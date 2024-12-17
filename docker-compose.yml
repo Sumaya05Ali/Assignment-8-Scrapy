@@ -1,21 +1,25 @@
-#version: '3'
 services:
-  db:
-    image: postgres:15
-    environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: trip_scraper_db
-    volumes:
-      - ./db_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-
-  scraper:
+  web:
     build: .
-    environment:
-      - DATABASE_URL=postgresql://user:password@db:5432/trip_scraper_db
+    container_name: hotel_scraper_web
+    command: ["scrapy", "crawl", "hotels"]
+    volumes:
+      - .:/app
     depends_on:
       - db
+    environment:
+      - DATABASE_URL=postgresql+psycopg2://myuser:mypassword@db:5432/hotel_db
+
+  db:
+    image: postgres:latest
+    container_name: hotel_scraper_db
+    restart: always
+    environment:
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: hotel_db
     volumes:
-      - ./trip_scraper/spiders:/app/spiders
+      - db_data:/var/lib/postgresql/data
+
+volumes:
+  db_data:
