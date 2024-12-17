@@ -1,0 +1,21 @@
+#version: '3'
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: trip_scraper_db
+    volumes:
+      - ./db_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  scraper:
+    build: .
+    environment:
+      - DATABASE_URL=postgresql://user:password@db:5432/trip_scraper_db
+    depends_on:
+      - db
+    volumes:
+      - ./trip_scraper/spiders:/app/spiders
